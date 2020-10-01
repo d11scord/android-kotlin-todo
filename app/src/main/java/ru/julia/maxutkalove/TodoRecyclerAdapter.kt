@@ -9,7 +9,7 @@ import ru.julia.maxutkalove.TodoRecyclerAdapter.TodoViewHolder
 
 class TodoRecyclerAdapter(
     private val todos: ArrayList<Todo>,
-    private val todoItemListener: TodoItemListener,
+    private val todoItemListener: TodoItemListener
 ) : RecyclerView.Adapter<TodoViewHolder>() {
 
     inner class TodoViewHolder(view: View)
