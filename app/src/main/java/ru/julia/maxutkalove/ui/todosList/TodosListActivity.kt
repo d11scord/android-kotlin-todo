@@ -1,4 +1,4 @@
-package ru.julia.maxutkalove
+package ru.julia.maxutkalove.ui.todosList
 
 import android.content.Intent
 import android.graphics.Canvas
@@ -12,9 +12,12 @@ import androidx.recyclerview.widget.ItemTouchHelper.RIGHT
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_todos_list.*
+import ru.julia.maxutkalove.R
+import ru.julia.maxutkalove.model.Todo
+import ru.julia.maxutkalove.ui.todoDetails.TodoActivity
 
-class MainActivity : AppCompatActivity() {
+class TodosListActivity : AppCompatActivity() {
 
     private val todos = ArrayList<Todo>()
     private var lastDeletedTodo: Todo? = null
@@ -22,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_todos_list)
         todos.add(Todo(1, "title", "text"))
         todos.add(Todo(2, "title1", "text1"))
         val swipeBackground = ColorDrawable(ContextCompat.getColor(this, R.color.swipe_red))
@@ -104,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         }
         val itemTouchHelper = ItemTouchHelper(itemTouchCallback)
         todosRecycler.apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
+            layoutManager = LinearLayoutManager(this@TodosListActivity)
             adapter = TodoRecyclerAdapter(todos) { position: Int -> // onItemClick
                 onItemClick(position)
             }

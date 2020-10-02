@@ -1,10 +1,12 @@
-package ru.julia.maxutkalove
+package ru.julia.maxutkalove.ui.todosList
 
 import android.view.*
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_todo.view.*
-import ru.julia.maxutkalove.TodoRecyclerAdapter.TodoViewHolder
+import ru.julia.maxutkalove.R
+import ru.julia.maxutkalove.ui.todosList.TodoRecyclerAdapter.TodoViewHolder
+import ru.julia.maxutkalove.model.Todo
 
 class TodoRecyclerAdapter(
     private val todos: ArrayList<Todo>,

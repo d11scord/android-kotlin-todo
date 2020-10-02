@@ -1,4 +1,4 @@
-package ru.julia.maxutkalove
+package ru.julia.maxutkalove.util
 
 import android.content.Context
 import android.widget.Toast

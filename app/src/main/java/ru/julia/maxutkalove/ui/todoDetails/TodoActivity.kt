@@ -1,8 +1,9 @@
-package ru.julia.maxutkalove
+package ru.julia.maxutkalove.ui.todoDetails
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import ru.julia.maxutkalove.Extensions.toast
+import ru.julia.maxutkalove.R
+import ru.julia.maxutkalove.util.Extensions.toast
 
 class TodoActivity : AppCompatActivity() {
 
