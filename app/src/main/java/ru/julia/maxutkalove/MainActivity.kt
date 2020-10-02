@@ -2,23 +2,23 @@ package ru.julia.maxutkalove
 
 import android.content.Intent
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.LEFT
 import androidx.recyclerview.widget.ItemTouchHelper.RIGHT
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
-import ru.julia.maxutkalove.Extensions.toast
 
-class MainActivity : AppCompatActivity(), TodoItemListener {
+class MainActivity : AppCompatActivity() {
 
     private val todos = ArrayList<Todo>()
-
+    private var lastDeletedTodo: Todo? = null
+    private var lastDeletedItemPosition: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +35,7 @@ class MainActivity : AppCompatActivity(), TodoItemListener {
             ) = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
-                todos.removeAt(viewHolder.adapterPosition)
-                todosRecycler.adapter?.notifyItemRemoved(viewHolder.adapterPosition)
+                onItemDelete(viewHolder.adapterPosition)
             }
 
             override fun onChildDraw(
@@ -48,11 +47,24 @@ class MainActivity : AppCompatActivity(), TodoItemListener {
                 actionState: Int,
                 isCurrentlyActive: Boolean
             ) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                super.onChildDraw(
+                    c,
+                    recyclerView,
+                    viewHolder,
+                    dX,
+                    dY,
+                    actionState,
+                    isCurrentlyActive
+                )
                 val itemView = viewHolder.itemView
                 val iconMargin = (itemView.height - deleteIcon.intrinsicHeight) / 2
                 if (dX > 0) {
-                    swipeBackground.setBounds(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
+                    swipeBackground.setBounds(
+                        itemView.left,
+                        itemView.top,
+                        dX.toInt(),
+                        itemView.bottom
+                    )
                     deleteIcon.setBounds(
                         itemView.left + iconMargin,
                         itemView.top + iconMargin,
@@ -60,7 +72,12 @@ class MainActivity : AppCompatActivity(), TodoItemListener {
                         itemView.bottom - iconMargin
                     )
                 } else {
-                    swipeBackground.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+                    swipeBackground.setBounds(
+                        itemView.right + dX.toInt(),
+                        itemView.top,
+                        itemView.right,
+                        itemView.bottom
+                    )
                     deleteIcon.setBounds(
                         itemView.right - iconMargin - deleteIcon.intrinsicWidth,
                         itemView.top + iconMargin,
@@ -74,7 +91,12 @@ class MainActivity : AppCompatActivity(), TodoItemListener {
                 if (dX > 0) {
                     c.clipRect(itemView.left, itemView.top, dX.toInt(), itemView.bottom)
                 } else {
-                    c.clipRect(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+                    c.clipRect(
+                        itemView.right + dX.toInt(),
+                        itemView.top,
+                        itemView.right,
+                        itemView.bottom
+                    )
                 }
                 deleteIcon.draw(c)
                 c.restore()
@@ -83,21 +105,37 @@ class MainActivity : AppCompatActivity(), TodoItemListener {
         val itemTouchHelper = ItemTouchHelper(itemTouchCallback)
         todosRecycler.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = TodoRecyclerAdapter(todos, this@MainActivity)
+            adapter = TodoRecyclerAdapter(todos) { position: Int -> // onItemClick
+                onItemClick(position)
+            }
             itemTouchHelper.attachToRecyclerView(this)
         }
     }
 
-    override fun onItemEdit(pos: Int) {
+    private fun onItemClick(pos: Int) {
         val intent = Intent(this, TodoActivity::class.java)
         intent.putExtra("todoId", todos[pos].id)
         startActivity(intent)
     }
 
-    override fun onItemDelete(pos: Int) {
+    private fun onItemDelete(pos: Int) {
+        lastDeletedItemPosition = pos
+        lastDeletedTodo = todos[pos].copy()
         todos.removeAt(pos)
         todosRecycler.adapter?.notifyItemRemoved(pos)
+        Snackbar.make(
+            findViewById(android.R.id.content),
+            "Todo \"${lastDeletedTodo?.title}\" deleted",
+            Snackbar.LENGTH_SHORT
+        ).apply {
+            setAction(R.string.undo) {
+                    if (lastDeletedItemPosition >= 0 && lastDeletedTodo != null) {
+                        todos.add(lastDeletedItemPosition, lastDeletedTodo!!)
+                        todosRecycler.adapter?.notifyItemInserted(lastDeletedItemPosition)
+                        dismiss()
+                    }
+                }
+            show()
+        }
     }
-
-
 }
