@@ -15,6 +15,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_todos_list.*
 import ru.julia.maxutkalove.R
 import ru.julia.maxutkalove.model.Todo
+import ru.julia.maxutkalove.repository.DBHelper
 import ru.julia.maxutkalove.ui.todoDetails.TodoActivity
 
 class TodosListActivity : AppCompatActivity() {
@@ -26,20 +27,20 @@ class TodosListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_todos_list)
-        todos.add(Todo(1, "title", "text"))
-        todos.add(Todo(2, "title1", "text1"))
+        updateTodosList()
+
         val swipeBackground = ColorDrawable(ContextCompat.getColor(this, R.color.swipe_red))
         val deleteIcon = ContextCompat.getDrawable(this, R.drawable.ic_delete)!!
         val itemTouchCallback = object : ItemTouchHelper.SimpleCallback(0, LEFT or RIGHT) {
+
             override fun onMove(
                 p0: RecyclerView,
                 p1: RecyclerView.ViewHolder,
                 p2: RecyclerView.ViewHolder
             ) = false
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) =
                 onItemDelete(viewHolder.adapterPosition)
-            }
 
             override fun onChildDraw(
                 c: Canvas,
@@ -105,13 +106,17 @@ class TodosListActivity : AppCompatActivity() {
                 c.restore()
             }
         }
-        val itemTouchHelper = ItemTouchHelper(itemTouchCallback)
+        ItemTouchHelper(itemTouchCallback).attachToRecyclerView(todosRecycler)
+    }
+
+    fun updateTodosList() {
+        todos.clear()
+        todos.addAll(DBHelper.getTodos())
         todosRecycler.apply {
             layoutManager = LinearLayoutManager(this@TodosListActivity)
             adapter = TodoRecyclerAdapter(todos) { position: Int -> // onItemClick
                 onItemClick(position)
             }
-            itemTouchHelper.attachToRecyclerView(this)
         }
     }
 
