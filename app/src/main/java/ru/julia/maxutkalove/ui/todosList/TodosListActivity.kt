@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -11,12 +12,14 @@ import androidx.recyclerview.widget.ItemTouchHelper.LEFT
 import androidx.recyclerview.widget.ItemTouchHelper.RIGHT
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_todos_list.*
 import ru.julia.maxutkalove.R
 import ru.julia.maxutkalove.model.Todo
 import ru.julia.maxutkalove.repository.DBHelper
 import ru.julia.maxutkalove.ui.todoDetails.TodoActivity
+import ru.julia.maxutkalove.util.Extensions.toast
 
 class TodosListActivity : AppCompatActivity() {
 
@@ -28,6 +31,22 @@ class TodosListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_todos_list)
         updateTodosList()
+        todosListRefreshLayout.setOnRefreshListener { updateTodosList() }
+        addTodoBtn.setOnClickListener {
+            MaterialAlertDialogBuilder(this).apply {
+                setTitle(getString(R.string.create_new_todo))
+                val editText = EditText(this@TodosListActivity)
+                setView(editText)
+                setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    if (!editText.text.isNullOrBlank()){
+                        onItemCreate(editText.text.toString())
+                    }
+                    dialog.dismiss()
+                }
+                setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss()}
+                show()
+            }
+        }
 
         val swipeBackground = ColorDrawable(ContextCompat.getColor(this, R.color.swipe_red))
         val deleteIcon = ContextCompat.getDrawable(this, R.drawable.ic_delete)!!
@@ -109,7 +128,7 @@ class TodosListActivity : AppCompatActivity() {
         ItemTouchHelper(itemTouchCallback).attachToRecyclerView(todosRecycler)
     }
 
-    fun updateTodosList() {
+    private fun updateTodosList() {
         todos.clear()
         todos.addAll(DBHelper.getTodos())
         todosRecycler.apply {
@@ -118,11 +137,23 @@ class TodosListActivity : AppCompatActivity() {
                 onItemClick(position)
             }
         }
+        todosListRefreshLayout.isRefreshing = false
     }
 
     private fun onItemClick(pos: Int) {
         val intent = Intent(this, TodoActivity::class.java)
         intent.putExtra("todoId", todos[pos].id)
+        startActivity(intent)
+    }
+
+    private fun onItemCreate(title: String) {
+        val newTodoId = DBHelper.createTodo(title)
+        if (newTodoId == -1L) {
+            toast(R.string.an_error_occurred_while_creating_todo)
+            return
+        }
+        val intent = Intent(this, TodoActivity::class.java)
+        intent.putExtra("todoId", newTodoId)
         startActivity(intent)
     }
 

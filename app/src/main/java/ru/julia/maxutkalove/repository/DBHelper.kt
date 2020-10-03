@@ -40,7 +40,7 @@ object DBHelper {
         try {
             if (cursor.moveToFirst()){
                 do {
-                    val id = cursor.getInt(idIndex)
+                    val id = cursor.getLong(idIndex)
                     val title = cursor.getString(titleIndex)
                     val body = cursor.getString(bodyIndex)
                     todos.add(Todo(
@@ -58,7 +58,7 @@ object DBHelper {
         }
     }
 
-    fun getTodoById(todoId: Int): Todo? {
+    fun getTodoById(todoId: Long): Todo? {
         val cursor =
             dbHelper
                 .readableDatabase
@@ -69,7 +69,7 @@ object DBHelper {
                 val titleIndex = cursor.getColumnIndex(TODOS_TITLE_NAME)
                 val bodyIndex = cursor.getColumnIndex(TODOS_BODY_NAME)
 
-                val id = cursor.getInt(idIndex)
+                val id = cursor.getLong(idIndex)
                 val title = cursor.getString(titleIndex)
                 val body = cursor.getString(bodyIndex)
                 return Todo(id, title, body)
@@ -80,6 +80,13 @@ object DBHelper {
             cursor.close()
         }
         return null
+    }
+
+    fun createTodo(title: String): Long {
+        val cv = ContentValues()
+        cv.put(TODOS_TITLE_NAME, title)
+        cv.put(TODOS_BODY_NAME, "")
+        return dbHelper.writableDatabase.insert(TODOS_TABLE_NAME, null, cv)
     }
 
     class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {

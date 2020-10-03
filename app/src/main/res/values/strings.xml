@@ -3,4 +3,6 @@
     <string name="delete">Delete</string>
   <string name="edit">Edit</string>
     <string name="undo">Undo</string>
+    <string name="create_new_todo">Create new Todo</string>
+    <string name="an_error_occurred_while_creating_todo">An error occurred while creating todo</string>
 </resources>
