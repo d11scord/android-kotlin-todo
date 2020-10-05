@@ -5,4 +5,6 @@
     <string name="undo">Undo</string>
     <string name="create_new_todo">Create new Todo</string>
     <string name="an_error_occurred_while_creating_todo">An error occurred while creating todo</string>
+    <string name="save">Save</string>
+    <string name="edit_todo_name">Edit todo name</string>
 </resources>

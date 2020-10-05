@@ -102,6 +102,13 @@ object DBHelper {
         }
     }
 
+    fun updateTodo(todoId: Long, title: String, body: String) {
+        val cv = ContentValues()
+        cv.put(TODOS_BODY_NAME, body)
+        cv.put(TODOS_TITLE_NAME, title)
+        dbHelper.writableDatabase.update(TODOS_TABLE_NAME, cv, "id=?", arrayOf(todoId.toString()))
+    }
+
     class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
 
         override fun onCreate(db: SQLiteDatabase) {

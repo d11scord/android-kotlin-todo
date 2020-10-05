@@ -18,7 +18,16 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/todoBottom"
             app:layout_constraintVertical_weight="1"
+            android:textColor="@color/black"
             android:padding="@dimen/todo_block_padding"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorPrimaryDark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/todoTop"
+            app:layout_constraintBottom_toTopOf="@id/todoBottom"/>
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/todoBottom"
@@ -29,6 +38,7 @@
             app:layout_constraintTop_toBottomOf="@id/todoTop"
             app:layout_constraintVertical_weight="1"
             android:padding="@dimen/todo_block_padding"
+            android:background="@null"
             android:gravity="start|top"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
