@@ -1,10 +1,10 @@
 package ru.julia.maxutkalove.ui.todoDetails
 
 import android.os.Bundle
-import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
@@ -24,10 +24,11 @@ import ru.julia.maxutkalove.model.Todo
 import ru.julia.maxutkalove.repository.DBHelper
 import ru.julia.maxutkalove.util.Extensions.toast
 
-class TodoActivity : AppCompatActivity() {
+class TodoActivity : AppCompatActivity(), View.OnClickListener {
 
     private var todoId: Long = -1
     private lateinit var currentTodo: Todo
+    private val shortcuts = ArrayList<MDShortcut>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +46,37 @@ class TodoActivity : AppCompatActivity() {
             finish()
         }
         title = currentTodo.title
-        todoTop.text = currentTodo.body
         todoBottom.setText(currentTodo.body)
         initMarkwon()
+        initShortcuts()
+    }
+
+    private fun initShortcuts() {
+        val h1 = MDShortcut.H1(View.generateViewId())
+        val h2 = MDShortcut.H2(View.generateViewId())
+        val h3 = MDShortcut.H3(View.generateViewId())
+        val h4 = MDShortcut.H4(View.generateViewId())
+        val h5 = MDShortcut.H5(View.generateViewId())
+        val h6 = MDShortcut.H6(View.generateViewId())
+        val bold = MDShortcut.Bold(View.generateViewId())
+        val italic = MDShortcut.Italic(View.generateViewId())
+        val listItem = MDShortcut.ListItem(View.generateViewId())
+        shortcuts.add(h1)
+        shortcuts.add(h2)
+        shortcuts.add(h3)
+        shortcuts.add(h4)
+        shortcuts.add(h5)
+        shortcuts.add(h6)
+        shortcuts.add(bold)
+        shortcuts.add(italic)
+        shortcuts.add(listItem)
+        shortcuts.forEach {
+            val button = Button(this)
+            button.text = it.name.trim()
+            button.id = it.buttonResId
+            button.setOnClickListener(this)
+            todoShortcutsHost.addView(button)
+        }
     }
 
     private fun initMarkwon() {
@@ -63,6 +92,7 @@ class TodoActivity : AppCompatActivity() {
         val editor: MarkwonEditor = MarkwonEditor.create(markwon)
         todoBottom.addTextChangedListener(MarkwonEditorTextWatcher.withProcess(editor))
         todoBottom.addTextChangedListener { todoTop.text = markwon.toMarkdown(todoBottom.text.toString()) }
+        todoTop.text = markwon.toMarkdown(currentTodo.body)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -85,14 +115,14 @@ class TodoActivity : AppCompatActivity() {
                     setView(editText)
                     setPositiveButton(android.R.string.ok) { dialog, _ ->
                         val newTitle = editText.text.toString()
-                        if (newTitle.isNotBlank()){
+                        if (newTitle.isNotBlank()) {
                             currentTodo.title = newTitle
                             title = newTitle
                             saveTodo()
                         }
                         dialog.dismiss()
                     }
-                    setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss()}
+                    setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
                     show()
                 }
                 true
@@ -109,5 +139,22 @@ class TodoActivity : AppCompatActivity() {
     private fun saveTodo() {
         currentTodo.body = todoBottom.text.toString()
         DBHelper.updateTodo(todoId, currentTodo.title, currentTodo.body)
+    }
+
+    override fun onClick(v: View) {
+        val shortcut = shortcuts.find { it.buttonResId == v.id }
+        if (shortcut != null) {
+            val start = todoBottom.selectionStart.coerceAtLeast(0)
+            val end = todoBottom.selectionEnd.coerceAtLeast(0)
+            todoBottom.text?.replace(
+                start.coerceAtMost(end),
+                start.coerceAtLeast(end),
+                shortcut.shortcut,
+                0,
+                shortcut.shortcut.length
+            )
+            val selectionStart = todoBottom.selectionStart - (shortcut.shortcut.length - shortcut.cursorPosition)
+            todoBottom.setSelection(selectionStart, selectionStart + shortcut.selectionLength)
+        }
     }
 }
