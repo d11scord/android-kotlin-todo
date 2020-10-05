@@ -2,6 +2,7 @@ package ru.julia.maxutkalove.repository
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import ru.julia.maxutkalove.model.Todo
@@ -59,10 +60,15 @@ object DBHelper {
     }
 
     fun getTodoById(todoId: Long): Todo? {
-        val cursor =
-            dbHelper
-                .readableDatabase
-                .rawQuery("SELECT * FROM $TODOS_TABLE_NAME WHERE $TODOS_ID_NAME=$todoId", null)
+        val cursor = dbHelper.readableDatabase.query(
+            TODOS_TABLE_NAME,
+            null,
+            "$TODOS_ID_NAME=?",
+            arrayOf(todoId.toString()),
+            null,
+            null,
+            null
+        )
         try {
             if (cursor.moveToFirst()){
                 val idIndex = cursor.getColumnIndex(TODOS_ID_NAME)
@@ -87,6 +93,13 @@ object DBHelper {
         cv.put(TODOS_TITLE_NAME, title)
         cv.put(TODOS_BODY_NAME, "")
         return dbHelper.writableDatabase.insert(TODOS_TABLE_NAME, null, cv)
+    }
+
+    fun deleteById(id: Long) {
+        val writableDatabase = dbHelper.writableDatabase
+        writableDatabase.use {
+            it.delete(TODOS_TABLE_NAME, "$TODOS_ID_NAME=?", arrayOf(id.toString()))
+        }
     }
 
     class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {

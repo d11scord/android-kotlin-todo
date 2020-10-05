@@ -158,9 +158,18 @@ class TodosListActivity : AppCompatActivity() {
     }
 
     private fun onItemDelete(pos: Int) {
+        val deletedTodoId = todos[pos].id
+        val deletionDelayThread = Thread {
+            try {
+                Thread.sleep(1500)
+                DBHelper.deleteById(deletedTodoId) }
+            catch (ignored: InterruptedException) {}
+        }.also { it.start() }
+
         lastDeletedItemPosition = pos
         lastDeletedTodo = todos[pos].copy()
         todos.removeAt(pos)
+
         todosRecycler.adapter?.notifyItemRemoved(pos)
         Snackbar.make(
             findViewById(android.R.id.content),
@@ -169,6 +178,7 @@ class TodosListActivity : AppCompatActivity() {
         ).apply {
             setAction(R.string.undo) {
                     if (lastDeletedItemPosition >= 0 && lastDeletedTodo != null) {
+                        deletionDelayThread.interrupt()
                         todos.add(lastDeletedItemPosition, lastDeletedTodo!!)
                         todosRecycler.adapter?.notifyItemInserted(lastDeletedItemPosition)
                         dismiss()
